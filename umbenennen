@@ -1,0 +1,49 @@
+#!/bin/bash
+# Ersetzt Zeichen im Dateinamen rekursiv
+# Vorlage: http://www.linux-community.de/Community/Fragen/Bash-Rename-Skript
+# Vorlage geschrieben von: Andi Latte
+# Lizenz nicht angegeben - nehme an: GPL
+# Ueberarbeitung: diolwe
+# Aufruf des Skriptes auf Korrektheit pruefen
+ 
+if [ -z $1 ];then echo Verwendung: umbenennen "/PFAD" ; exit 0;fi
+ 
+# Zuerst checken: conmv installiert?
+# Wenn ja: Meldung ungueltige Kodierung bearbeiten
+# Wenn nein: Abbruch
+if [ -f /usr/bin/convmv ]
+  then convmv -f iso-8859-15 -t utf8 -r "$1" --notest ;
+  else echo "Bitte zuerst convmv mit dem Paketmanager Ihres Linux installieren!" ; exit 1
+fi
+ 
+#
+# Skript Start
+#
+ 
+find "$1" -depth -name "*" | while read file ; do
+directory=$(dirname "$file")
+oldfilename=$(basename "$file")
+ 
+# sed und tr als Mittel der Bearbeitung
+# Befehle sind so aufgestellt, dass einzelne Aktionen
+# leicht durch Loeschen zwischen den Pipes
+# veraendert werden koennen
+ 
+newfilename=$(echo "$oldfilename" | tr "'" "_" | tr '!@#+ ' '_____' | tr '[]{}' '()()()' | sed -e 's/[\`\´\"\]//g' | sed -e 's/\&/and/g' | sed -e 's/[àáâãäå]/ae/g;s/[ÀÁÂÃÄÅ]/Ae/g;s/[éëêè]/e/g;s/[ÈÉÊË€]/E/g;s/[ìíîï]/i/g;s/[ÌÍÎÏ¡]/I/g;s/[òóôõöø]/oe/g;s/[ÒÓÔÕÖ]/Oe/g;s/[ùúûü]/ue/g;s/[ÙÚÛÜ]/Ue/g;s/[ÿý?]/y/g;s/[ÝŸ]/Y/g;s/[æ]/ae/g;s/[Æ]/AE/g;s/[ç¢©]/c/g;s/[Ç]/C/g;s/[ßš]/ss/g;s/[$§Š]/S/g;s/[=¦#:~*¿·¸°¯\%";+^˜‰…‡†???•]/_/g;s/[²]/2/g;s/[³]/3/g' | sed -e 's/[^\(\)\.\/\_a-zA-Z0-9-]//g' | tr [:upper:] [:lower:] | iconv -t ascii)
+ 
+# Katastrophenpotential einschraenken
+if [ "$oldfilename" != "$newfilename" ]; then
+ 
+# Umbenennen beginnen
+mv -i "$directory/$oldfilename" "$directory/$newfilename"
+ 
+# Benutzer informieren
+echo ""$directory/$oldfilename" ---> "$directory/$newfilename""
+#echo "$directory"
+#echo "$oldfilename"
+#echo "$newfilename"
+#echo
+fi
+done
+exit 0
+
