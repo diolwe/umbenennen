@@ -9,7 +9,7 @@
 if [ -z $1 ];then echo Verwendung: umbenennen "/PFAD" ; exit 0;fi
  
 # Zuerst checken: conmv installiert?
-# Wenn ja: Meldung ungueltige Kodierung bearbeiten
+# Wenn ja: Meldung bearbeiten
 # Wenn nein: Abbruch
 if [ -f /usr/bin/convmv ]
   then convmv -f iso-8859-15 -t utf8 -r "$1" --notest ;
